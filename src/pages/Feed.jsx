@@ -1,114 +1,189 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, addDoc, getDocs, orderBy, query, updateDoc, doc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import './Feed.css';
 
 export default function Feed() {
-  const { user, profile } = useAuth();
+  const { user, userProfile } = useAuth();
   const [posts, setPosts] = useState([]);
-  const [text, setText] = useState('');
-  const [activeTab, setActiveTab] = useState('posts');
+  const [newPost, setNewPost] = useState('');
+  const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
+  const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-    return unsub;
+    loadPosts();
+    loadBookmarks();
   }, []);
 
-  async function submitPost() {
-    if (!text.trim() || posting) return;
+  const loadPosts = async () => {
+    try {
+      const q = query(collection(db, 'posts'), orderBy('created_at', 'desc'));
+      const snap = await getDocs(q);
+      setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadBookmarks = async () => {
+    try {
+      const q = query(collection(db, 'bookmarks'), orderBy('created_at', 'desc'));
+      const snap = await getDocs(q);
+      const myBookmarks = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(b => b.user_id === user.uid);
+      setBookmarks(myBookmarks.map(b => b.post_id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePost = async () => {
+    if (!newPost.trim() || posting) return;
     setPosting(true);
-    await addDoc(collection(db, 'posts'), {
-      text: text.trim(),
-      authorId: user.uid,
-      authorName: profile?.displayName || user.displayName || user.email,
-      authorTitle: profile?.title || '',
-      type: 'post',
-      likes: [],
-      createdAt: serverTimestamp(),
-    });
-    setText('');
-    setPosting(false);
-  }
+    try {
+      const postData = {
+        content: newPost,
+        author_id: user.uid,
+        author_name: userProfile?.full_name || 'Member',
+        author_title: userProfile?.title || '',
+        author_company: userProfile?.company || '',
+        author_image: userProfile?.profile_image || null,
+        likes: [],
+        comment_count: 0,
+        created_at: serverTimestamp()
+      };
+      const docRef = await addDoc(collection(db, 'posts'), postData);
+      setPosts(prev => [{ id: docRef.id, ...postData, created_at: new Date() }, ...prev]);
+      setNewPost('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPosting(false);
+    }
+  };
 
-  async function toggleLike(post) {
-    const ref = doc(db, 'posts', post.id);
-    const liked = post.likes?.includes(user.uid);
-    await updateDoc(ref, { likes: liked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
-  }
+  const handleLike = async (postId, likes) => {
+    const postRef = doc(db, 'posts', postId);
+    const liked = likes?.includes(user.uid);
+    await updateDoc(postRef, { likes: liked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+    setPosts(prev => prev.map(p => p.id === postId ? {
+      ...p, likes: liked ? p.likes.filter(id => id !== user.uid) : [...(p.likes || []), user.uid]
+    } : p));
+  };
 
-  const initials = (name) => (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const handleBookmark = async (postId) => {
+    const isBookmarked = bookmarks.includes(postId);
+    if (isBookmarked) {
+      setBookmarks(prev => prev.filter(id => id !== postId));
+    } else {
+      await addDoc(collection(db, 'bookmarks'), {
+        post_id: postId,
+        user_id: user.uid,
+        created_at: serverTimestamp()
+      });
+      setBookmarks(prev => [...prev, postId]);
+    }
+  };
 
-  const articles = posts.filter(p => p.type === 'article');
-  const regularPosts = posts.filter(p => p.type !== 'article');
+  const formatTime = (ts) => {
+    if (!ts) return 'just now';
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    const diff = (Date.now() - date.getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  };
+
+  const bookmarkedPosts = posts.filter(p => bookmarks.includes(p.id));
 
   return (
     <div className="feed-page">
-      <div className="feed-container">
-        {/* Composer */}
-        <div className="composer">
-          <div className="composer-avatar">{initials(profile?.displayName || user?.displayName)}</div>
-          <div className="composer-body">
-            <textarea
-              className="composer-input"
-              placeholder="Share an insight with your circle..."
-              value={text}
-              onChange={e => setText(e.target.value)}
-              rows={3}
-            />
-            <div className="composer-footer">
-              <button className="post-btn" onClick={submitPost} disabled={!text.trim() || posting}>
-                {posting ? 'Posting...' : 'POST'}
-              </button>
-            </div>
+      {/* Compose */}
+      <div className="compose-card">
+        <div className="compose-avatar">
+          {userProfile?.profile_image ? (
+            <img src={userProfile.profile_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          ) : (
+            userProfile?.full_name?.charAt(0) || 'U'
+          )}
+        </div>
+        <div className="compose-content">
+          <textarea
+            className="compose-input"
+            placeholder="Share an insight with your circle..."
+            value={newPost}
+            onChange={e => setNewPost(e.target.value)}
+            rows={3}
+          />
+          <div className="compose-footer">
+            <button className="compose-btn" onClick={handlePost} disabled={!newPost.trim() || posting}>
+              {posting ? 'POSTING...' : 'POST'}
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="feed-tabs">
-          {['posts', 'articles'].map(tab => (
-            <button key={tab} className={`feed-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-              {tab.toUpperCase()}
-            </button>
-          ))}
-        </div>
+      {/* Tabs */}
+      <div className="feed-tabs">
+        <button className={`feed-tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>Posts</button>
+        <button className={`feed-tab ${activeTab === 'bookmarks' ? 'active' : ''}`} onClick={() => setActiveTab('bookmarks')}>
+          Saved {bookmarks.length > 0 && `(${bookmarks.length})`}
+        </button>
+      </div>
 
-        {/* Posts */}
+      {/* Posts */}
+      {loading ? (
+        <div className="feed-loading">Loading...</div>
+      ) : (
         <div className="posts-list">
-          {(activeTab === 'posts' ? regularPosts : articles).map(post => {
-            const liked = post.likes?.includes(user?.uid);
-            return (
+          {(activeTab === 'posts' ? posts : bookmarkedPosts).length === 0 ? (
+            <div className="feed-empty">
+              <div className="empty-icon">◈</div>
+              <h3>{activeTab === 'posts' ? 'Your Feed Awaits' : 'No Saved Posts'}</h3>
+              <p>{activeTab === 'posts' ? 'Share your first insight' : 'Save posts to read later'}</p>
+            </div>
+          ) : (
+            (activeTab === 'posts' ? posts : bookmarkedPosts).map(post => (
               <div key={post.id} className="post-card">
                 <div className="post-header">
-                  <div className="post-avatar">{initials(post.authorName)}</div>
-                  <div className="post-meta">
-                    <span className="post-author">{post.authorName}</span>
-                    {post.authorTitle && <span className="post-author-title">{post.authorTitle}</span>}
-                    <span className="post-time">{post.createdAt?.toDate?.()?.toLocaleDateString() || ''}</span>
+                  <div className="post-avatar">
+                    {post.author_image ? (
+                      <img src={post.author_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                      post.author_name?.charAt(0) || 'M'
+                    )}
+                  </div>
+                  <div className="post-author-info">
+                    <div className="post-author-name">{post.author_name}</div>
+                    <div className="post-author-meta">
+                      {post.author_title}{post.author_title && post.author_company ? ' · ' : ''}{post.author_company}
+                    </div>
+                    <div className="post-time">{formatTime(post.created_at)}</div>
                   </div>
                 </div>
-                <p className="post-text">{post.text}</p>
+                <div className="post-content">{post.content}</div>
                 <div className="post-actions">
-                  <button className={`action-btn ${liked ? 'liked' : ''}`} onClick={() => toggleLike(post)}>
-                    {liked ? '♦' : '◇'} {post.likes?.length || 0}
+                  <button className={`post-action ${post.likes?.includes(user.uid) ? 'liked' : ''}`} onClick={() => handleLike(post.id, post.likes)}>
+                    ♦ {post.likes?.length || 0}
+                  </button>
+                  <button className="post-action">◻ {post.comment_count || 0}</button>
+                  <button className={`post-action ${bookmarks.includes(post.id) ? 'liked' : ''}`} onClick={() => handleBookmark(post.id)}>
+                    {bookmarks.includes(post.id) ? '★ Saved' : '☆ Save'}
                   </button>
                 </div>
               </div>
-            );
-          })}
-          {(activeTab === 'posts' ? regularPosts : articles).length === 0 && (
-            <div className="feed-empty">
-              <div className="empty-icon">◈</div>
-              <p>Your Feed Awaits</p>
-              <span>Share your first insight</span>
-            </div>
+            ))
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
