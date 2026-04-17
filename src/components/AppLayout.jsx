@@ -34,11 +34,9 @@ export default function AppLayout({ children }) {
           )}
           <button className="signout-btn" onClick={handleSignOut}>Sign Out</button>
           <button className="avatar-btn" onClick={() => navigate('/profile')}>
-            {userProfile?.profile_image ? (
-              <img src={userProfile.profile_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-            ) : (
-              initials()
-            )}
+            {userProfile?.profile_image
+              ? <img src={userProfile.profile_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              : initials()}
           </button>
         </div>
       </header>
@@ -62,5 +60,6 @@ export default function AppLayout({ children }) {
     </div>
   );
 }
+
 
 
