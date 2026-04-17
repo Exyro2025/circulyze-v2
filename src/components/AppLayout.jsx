@@ -32,6 +32,7 @@ export default function AppLayout({ children }) {
           {userProfile?.role === 'admin' && (
             <NavLink to="/admin" className="admin-link">Admin</NavLink>
           )}
+          <button className="signout-btn" onClick={handleSignOut}>Sign Out</button>
           <button className="avatar-btn" onClick={() => navigate('/profile')}>
             {userProfile?.profile_image ? (
               <img src={userProfile.profile_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
@@ -61,4 +62,5 @@ export default function AppLayout({ children }) {
     </div>
   );
 }
+
 
