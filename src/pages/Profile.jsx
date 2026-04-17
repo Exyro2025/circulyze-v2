@@ -15,12 +15,17 @@ const INDUSTRIES = [
   'Consulting', 'Manufacturing', 'Other'
 ];
 
+function getBadge(userProfile) {
+  if (userProfile?.role === 'admin') return { label: 'FOUNDER', className: 'badge-founder' };
+  if (userProfile?.is_founding_member || userProfile?.subscription_tier === 'founding') return { label: 'FOUNDING MEMBER', className: 'badge-founding' };
+  if (userProfile?.subscription_tier === 'inner_circle') return { label: 'INNER CIRCLE', className: 'badge-inner' };
+  return { label: 'MEMBER', className: 'badge-member' };
+}
+
 export default function Profile() {
   const { user, userProfile, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({
-    full_name: '', title: '', company: '', industry: '', bio: '',
-  });
+  const [form, setForm] = useState({ full_name: '', title: '', company: '', industry: '', bio: '' });
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef(null);
@@ -50,9 +55,8 @@ export default function Profile() {
         getDocs(collection(db, 'users'))
       ]);
       setMyInviteCodes(inviteSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      // Exclude admin accounts from founding spot count
-      const nonAdminMembers = memberSnap.docs.filter(d => d.data().role !== 'admin');
-      setMemberCount(nonAdminMembers.length);
+      const nonAdmin = memberSnap.docs.filter(d => d.data().role !== 'admin');
+      setMemberCount(nonAdmin.length);
     } catch (err) { console.error(err); }
   };
 
@@ -101,27 +105,25 @@ export default function Profile() {
   if (!userProfile) return <div className="profile-loading">LOADING...</div>;
 
   const spotsLeft = Math.max(0, FOUNDING_LIMIT - memberCount);
+  const badge = getBadge(userProfile);
+  const isFoundingOrAdmin = userProfile?.role === 'admin' || userProfile?.is_founding_member || userProfile?.subscription_tier === 'founding';
 
   return (
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-avatar-large" onClick={() => fileInputRef.current?.click()}>
-          {userProfile.profile_image ? (
-            <img src={userProfile.profile_image} alt="" />
-          ) : (
-            <span>{userProfile.full_name?.charAt(0) || 'U'}</span>
-          )}
+          {userProfile.profile_image
+            ? <img src={userProfile.profile_image} alt="" />
+            : <span>{userProfile.full_name?.charAt(0) || 'U'}</span>}
           <div className="avatar-overlay">{uploadingPhoto ? '...' : '📷'}</div>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
         <h1 className="profile-name">{userProfile.full_name}</h1>
         <p className="profile-title">{userProfile.title}</p>
         <p className="profile-company">{userProfile.company}</p>
-        {userProfile.subscription_tier && (
-          <div className="profile-tier">
-            <span className="tier-badge">◈ {userProfile.subscription_tier?.toUpperCase()}</span>
-          </div>
-        )}
+        <div className="profile-tier">
+          <span className={`tier-badge ${badge.className}`}>◈ {badge.label}</span>
+        </div>
       </div>
 
       <div className="profile-stats">
@@ -131,14 +133,14 @@ export default function Profile() {
         </div>
         <div className="stat-div" />
         <div className="profile-stat">
-          <span className="stat-val" style={{ fontSize: userProfile.industry ? '14px' : '28px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
+          <span className="stat-val" style={{ fontSize: userProfile.industry ? '13px' : '28px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
             {userProfile.industry || '—'}
           </span>
           <span className="stat-lbl">Industry</span>
         </div>
         <div className="stat-div" />
         <div className="profile-stat">
-          <span className="stat-val" style={{ fontSize: '16px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
+          <span className="stat-val" style={{ fontSize: '15px', fontFamily: 'Montserrat' }}>
             {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}
           </span>
           <span className="stat-lbl">Member Since</span>
@@ -186,22 +188,46 @@ export default function Profile() {
             <p className="bio-text">{userProfile.bio || 'No bio yet.'}</p>
             <div className="profile-meta">
               <div className="meta-item"><span className="meta-icon">✉</span><span>{userProfile.email}</span></div>
-              <div className="meta-item"><span className="meta-icon">◈</span><span>Member since {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}</span></div>
+              <div className="meta-item"><span className="meta-icon">◈</span>
+                <span>Member since {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}</span>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {!editing && (
+      {/* Subscription — only show upgrade for non-founding free members */}
+      {!editing && !isFoundingOrAdmin && (
         <div className="profile-section">
-          <h3>Subscription</h3>
-          <div className="subscription-badge">
-            <span className="sub-icon">◈</span>
-            <span className="sub-label">{userProfile.subscription_tier?.toUpperCase() || 'FOUNDING'}</span>
+          <h3>Upgrade Membership</h3>
+          <div className="upgrade-card">
+            <div className="upgrade-info">
+              <div className="upgrade-title">Inner Circle</div>
+              <div className="upgrade-price">$99<span>/mo</span></div>
+              <p className="upgrade-desc">Priority AI processing, exclusive events, advanced analytics, and white-glove onboarding.</p>
+            </div>
+            <button className="btn-primary">UPGRADE TO INNER CIRCLE</button>
           </div>
         </div>
       )}
 
+      {/* Founding/Admin badge display */}
+      {!editing && isFoundingOrAdmin && (
+        <div className="profile-section">
+          <h3>Membership</h3>
+          <div className="subscription-badge">
+            <span className="sub-icon">◈</span>
+            <span className="sub-label">{badge.label}</span>
+          </div>
+          {isFoundingOrAdmin && (
+            <p style={{ fontSize: '11px', color: 'rgba(232,224,208,0.3)', marginTop: '12px', fontFamily: 'Montserrat', fontWeight: 300, lineHeight: 1.7 }}>
+              Founding member access is yours for life.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Invite section */}
       {!editing && (
         <div className="profile-section">
           <div className="invite-card">
@@ -244,6 +270,7 @@ export default function Profile() {
     </div>
   );
 }
+
 
 
 
