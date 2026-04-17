@@ -1,0 +1,34 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #C9A96C;
+  --gold-dim: rgba(201,169,108,0.5);
+  --gold-faint: rgba(201,169,108,0.1);
+  --black: #000000;
+  --bg: #080808;
+  --surface: rgba(255,255,255,0.02);
+  --border: rgba(201,169,108,0.12);
+  --text: #e8e0d0;
+  --text-dim: rgba(232,224,208,0.5);
+  --text-faint: rgba(232,224,208,0.25);
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Montserrat', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  background: var(--black);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { height: 100%; }
+
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-sans); }
+input, textarea { font-family: var(--font-sans); }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201,169,108,0.15); border-radius: 2px; }
