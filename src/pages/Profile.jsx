@@ -16,10 +16,21 @@ const INDUSTRIES = [
 ];
 
 function getBadge(userProfile) {
-  if (userProfile?.role === 'admin') return { label: 'FOUNDER', className: 'badge-founder' };
-  if (userProfile?.is_founding_member || userProfile?.subscription_tier === 'founding') return { label: 'FOUNDING MEMBER', className: 'badge-founding' };
-  if (userProfile?.subscription_tier === 'inner_circle') return { label: 'INNER CIRCLE', className: 'badge-inner' };
+  const tier = userProfile?.subscription_tier;
+  const role = userProfile?.role;
+  if (role === 'admin' || tier === 'founder') return { label: 'FOUNDER', className: 'badge-founder' };
+  if (tier === 'founding' || userProfile?.is_founding_member) return { label: 'FOUNDING MEMBER', className: 'badge-founding' };
+  if (tier === 'inner_circle') return { label: 'INNER CIRCLE', className: 'badge-inner' };
   return { label: 'MEMBER', className: 'badge-member' };
+}
+
+function getMembershipDesc(userProfile) {
+  const tier = userProfile?.subscription_tier;
+  const role = userProfile?.role;
+  if (role === 'admin' || tier === 'founder') return 'Founder · Free · Permanent';
+  if (tier === 'founding' || userProfile?.is_founding_member) return 'Founding Member · $0 forever';
+  if (tier === 'inner_circle') return 'Inner Circle · $99/mo';
+  return 'Member';
 }
 
 export default function Profile() {
@@ -106,10 +117,14 @@ export default function Profile() {
 
   const spotsLeft = Math.max(0, FOUNDING_LIMIT - memberCount);
   const badge = getBadge(userProfile);
-  const isFoundingOrAdmin = userProfile?.role === 'admin' || userProfile?.is_founding_member || userProfile?.subscription_tier === 'founding';
+  const membershipDesc = getMembershipDesc(userProfile);
+  const isFreeForLife = badge.label === 'FOUNDER' || badge.label === 'FOUNDING MEMBER';
+  const showUpgrade = !isFreeForLife && userProfile?.subscription_tier !== 'inner_circle';
 
   return (
     <div className="profile-page">
+
+      {/* HEADER */}
       <div className="profile-header">
         <div className="profile-avatar-large" onClick={() => fileInputRef.current?.click()}>
           {userProfile.profile_image
@@ -126,6 +141,7 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* STATS */}
       <div className="profile-stats">
         <div className="profile-stat">
           <span className="stat-val">{userProfile.connection_count || 0}</span>
@@ -133,7 +149,7 @@ export default function Profile() {
         </div>
         <div className="stat-div" />
         <div className="profile-stat">
-          <span className="stat-val" style={{ fontSize: userProfile.industry ? '13px' : '28px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
+          <span className="stat-val" style={{ fontSize: userProfile.industry ? '13px' : '28px', fontFamily: 'Montserrat' }}>
             {userProfile.industry || '—'}
           </span>
           <span className="stat-lbl">Industry</span>
@@ -147,6 +163,7 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* ABOUT */}
       <div className="profile-section">
         <div className="section-header">
           <h3>About</h3>
@@ -196,38 +213,29 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Subscription — only show upgrade for non-founding free members */}
-      {!editing && !isFoundingOrAdmin && (
-        <div className="profile-section">
-          <h3>Upgrade Membership</h3>
-          <div className="upgrade-card">
-            <div className="upgrade-info">
-              <div className="upgrade-title">Inner Circle</div>
-              <div className="upgrade-price">$99<span>/mo</span></div>
-              <p className="upgrade-desc">Priority AI processing, exclusive events, advanced analytics, and white-glove onboarding.</p>
-            </div>
-            <button className="btn-primary">UPGRADE TO INNER CIRCLE</button>
-          </div>
-        </div>
-      )}
-
-      {/* Founding/Admin badge display */}
-      {!editing && isFoundingOrAdmin && (
+      {/* MEMBERSHIP */}
+      {!editing && (
         <div className="profile-section">
           <h3>Membership</h3>
           <div className="subscription-badge">
             <span className="sub-icon">◈</span>
             <span className="sub-label">{badge.label}</span>
           </div>
-          {isFoundingOrAdmin && (
-            <p style={{ fontSize: '11px', color: 'rgba(232,224,208,0.3)', marginTop: '12px', fontFamily: 'Montserrat', fontWeight: 300, lineHeight: 1.7 }}>
-              Founding member access is yours for life.
-            </p>
+          <p style={{ fontSize: '12px', color: 'rgba(232,224,208,0.3)', marginTop: '12px', fontFamily: 'Montserrat', fontWeight: 300, lineHeight: 1.7 }}>
+            {membershipDesc}
+          </p>
+          {showUpgrade && (
+            <div className="upgrade-card" style={{ marginTop: 24 }}>
+              <div className="upgrade-title">Inner Circle</div>
+              <div className="upgrade-price">$99<span>/mo</span></div>
+              <p className="upgrade-desc">Priority AI processing, exclusive events, advanced analytics, and white-glove onboarding.</p>
+              <button className="btn-primary">UPGRADE TO INNER CIRCLE</button>
+            </div>
           )}
         </div>
       )}
 
-      {/* Invite section */}
+      {/* INVITE */}
       {!editing && (
         <div className="profile-section">
           <div className="invite-card">
@@ -270,6 +278,7 @@ export default function Profile() {
     </div>
   );
 }
+
 
 
 
