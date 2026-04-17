@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
+
+.privacy-page { background: #050505; min-height: 100vh; color: #e8e0d0; }
+.privacy-nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 48px; border-bottom: 1px solid rgba(201,169,108,0.08); }
+.privacy-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #C9A96C; cursor: pointer; letter-spacing: 0.05em; }
+.privacy-back { background: none; border: none; color: rgba(232,224,208,0.35); font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: color 0.2s; }
+.privacy-back:hover { color: #C9A96C; }
+
+.privacy-body { max-width: 720px; margin: 0 auto; padding: 64px 32px 100px; }
+.privacy-eyebrow { font-size: 9px; letter-spacing: 0.35em; color: #C9A96C; margin-bottom: 16px; font-family: 'Montserrat', sans-serif; }
+.privacy-title { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300; color: #e8e0d0; margin-bottom: 8px; }
+.privacy-updated { font-size: 11px; color: rgba(232,224,208,0.25); font-family: 'Montserrat', sans-serif; letter-spacing: 0.05em; margin-bottom: 56px; }
+
+.privacy-section { margin-bottom: 48px; }
+.privacy-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: #e8e0d0; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(201,169,108,0.1); }
+.privacy-section h3 { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: #C9A96C; margin: 24px 0 10px; }
+.privacy-section p { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300; line-height: 1.9; color: rgba(232,224,208,0.5); }
+.privacy-section strong { color: rgba(232,224,208,0.7); font-weight: 500; }
+
+.privacy-divider { height: 1px; background: rgba(201,169,108,0.08); margin: 48px 0; }
+.privacy-footer-note { font-size: 10px; letter-spacing: 0.1em; color: rgba(232,224,208,0.15); text-align: center; margin-top: 48px; font-family: 'Montserrat', sans-serif; }
