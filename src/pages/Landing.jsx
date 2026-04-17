@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Landing.css';
 
@@ -12,9 +13,9 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { num: '01', title: 'Apply', desc: 'Submit your application. We review your background, industry, and what you bring to the circle.' },
-  { num: '02', title: 'Vetting', desc: 'Every member is personally reviewed. Circulyze is not for everyone — and that is the point.' },
-  { num: '03', title: 'Enter', desc: 'Access the full network, all seven AI engines, and a circle of leaders who operate at your level.' },
+  { num: '01', title: 'Apply', desc: 'Submit your application. Tell us who you are, what you\'ve built, and what you bring to the circle.' },
+  { num: '02', title: 'Vetting & Review', desc: 'Every application is personally reviewed. We are not building a crowd — we are building a circle.' },
+  { num: '03', title: 'Enter the Circle', desc: 'Access the full network, all seven AI engines, and leaders who operate at your level.' },
 ];
 
 const TIERS = [
@@ -40,6 +41,14 @@ const TIERS = [
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+
+  const handleWaitlist = (e) => {
+    e.preventDefault();
+    if (!waitlistEmail.trim()) return;
+    setWaitlistSubmitted(true);
+  };
 
   return (
     <div className="landing">
@@ -58,7 +67,7 @@ export default function Landing() {
         <div className="hero-bg-grid" />
         <div className="hero-bg-glow" />
         <div className="hero-content">
-          <div className="hero-eyebrow">BY INVITATION · EXCLUSIVELY VETTED</div>
+          <div className="hero-badge">INVITE-ONLY</div>
           <h1 className="hero-headline">
             Intelligence<br />
             <em>in Circulation.</em>
@@ -72,11 +81,11 @@ export default function Landing() {
             <button className="btn-ghost" onClick={() => navigate('/login')}>Sign In →</button>
           </div>
           <div className="hero-stat-row">
-            <div className="hero-stat"><span>50</span><small>Founding Spots</small></div>
+            <div className="hero-stat"><span>7</span><small>AI Features</small></div>
             <div className="hero-stat-div" />
-            <div className="hero-stat"><span>7</span><small>AI Engines</small></div>
+            <div className="hero-stat"><span>18</span><small>Industries</small></div>
             <div className="hero-stat-div" />
-            <div className="hero-stat"><span>∞</span><small>Collective Intelligence</small></div>
+            <div className="hero-stat"><span>100%</span><small>Vetted</small></div>
           </div>
         </div>
         <div className="hero-orb" />
@@ -86,9 +95,8 @@ export default function Landing() {
       <section className="land-manifesto">
         <div className="manifesto-line" />
         <blockquote className="manifesto-quote">
-          "The most consequential decisions in business are never made alone.
-          They are forged in rooms where the right minds meet, trust is earned,
-          and intelligence flows freely. Circulyze is that room."
+          "This is not another social network. This is where decisions are made,
+          alliances are forged, and intelligence compounds."
         </blockquote>
         <div className="manifesto-attr">— Australia Lawrence, Founder & CEO</div>
         <div className="manifesto-line" />
@@ -110,15 +118,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* HOW YOU GET IN */}
       <section className="land-how">
         <div className="section-eyebrow">THE PROCESS</div>
-        <h2 className="section-title">How It Works</h2>
+        <h2 className="section-title">How You Get In</h2>
         <div className="steps-row">
           {STEPS.map((s, i) => (
             <div key={i} className="step-card">
               <div className="step-num">{s.num}</div>
-              <div className="step-connector">{i < STEPS.length - 1 && <span className="step-line" />}</div>
               <div className="step-title">{s.title}</div>
               <div className="step-desc">{s.desc}</div>
             </div>
@@ -133,7 +140,7 @@ export default function Landing() {
         <div className="pricing-grid">
           {TIERS.map((t, i) => (
             <div key={i} className={`pricing-card ${t.highlight ? 'pricing-highlight' : ''}`}>
-              {t.highlight && <div className="pricing-badge">INNER CIRCLE</div>}
+              {t.highlight && <div className="pricing-badge">RECOMMENDED</div>}
               <div className="pricing-name">{t.name}</div>
               <div className="pricing-price">
                 <span className="price-amount">{t.price}</span>
@@ -148,6 +155,7 @@ export default function Landing() {
               <button
                 className={t.highlight ? 'btn-gold' : 'btn-outline'}
                 onClick={() => navigate('/apply')}
+                style={{ width: '100%' }}
               >
                 {t.cta}
               </button>
@@ -156,17 +164,35 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* APPLY CTA */}
+      {/* WAITLIST + APPLY */}
       <section className="land-apply">
         <div className="apply-inner">
-          <div className="apply-eyebrow">FOUNDING MEMBERSHIP</div>
-          <h2 className="apply-title">50 Spots.<br />One Chance.</h2>
+          <div className="apply-eyebrow">JOIN THE WAITLIST</div>
+          <h2 className="apply-title">Your Circle<br />Is Waiting.</h2>
           <p className="apply-sub">
-            Founding members shape the culture, the conversation, and the future of Circulyze.
-            Once these spots are filled, they are gone permanently.
+            Enter your email to join the waitlist. When a spot opens,
+            you'll be the first to know.
           </p>
-          <button className="btn-gold btn-lg" onClick={() => navigate('/apply')}>
-            Apply for Founding Membership
+          {waitlistSubmitted ? (
+            <div className="waitlist-success">
+              <span>◈</span> You're on the list. We'll be in touch.
+            </div>
+          ) : (
+            <form className="waitlist-form" onSubmit={handleWaitlist}>
+              <input
+                className="waitlist-input"
+                type="email"
+                placeholder="Your email address"
+                value={waitlistEmail}
+                onChange={e => setWaitlistEmail(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn-gold">JOIN WAITLIST</button>
+            </form>
+          )}
+          <div className="apply-divider">or</div>
+          <button className="btn-outline-full" onClick={() => navigate('/apply')}>
+            Apply for Full Membership →
           </button>
           <p className="apply-note">Applications are reviewed within 48 hours. Not everyone is admitted.</p>
         </div>
@@ -179,7 +205,7 @@ export default function Landing() {
         <div className="footer-links">
           <button onClick={() => navigate('/apply')}>Apply</button>
           <button onClick={() => navigate('/login')}>Sign In</button>
-          <button onClick={() => navigate('/privacy')}>Privacy</button>
+          <button onClick={() => navigate('/privacy')}>Privacy & Terms</button>
         </div>
         <div className="footer-copy">© 2026 Circulyze · A Vōrai Private Holdings Platform · All Rights Reserved</div>
       </footer>
