@@ -19,11 +19,7 @@ export default function Profile() {
   const { user, userProfile, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
-    full_name: userProfile?.full_name || '',
-    title: userProfile?.title || '',
-    company: userProfile?.company || '',
-    industry: userProfile?.industry || '',
-    bio: userProfile?.bio || '',
+    full_name: '', title: '', company: '', industry: '', bio: '',
   });
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -33,11 +29,6 @@ export default function Profile() {
   const [memberCount, setMemberCount] = useState(0);
   const [copied, setCopied] = useState(null);
 
-  useEffect(() => {
-    loadInviteData();
-  }, []);
-
-  // Keep form in sync if userProfile loads after mount
   useEffect(() => {
     if (userProfile) {
       setForm({
@@ -50,6 +41,8 @@ export default function Profile() {
     }
   }, [userProfile]);
 
+  useEffect(() => { loadInviteData(); }, []);
+
   const loadInviteData = async () => {
     try {
       const [inviteSnap, memberSnap] = await Promise.all([
@@ -57,10 +50,10 @@ export default function Profile() {
         getDocs(collection(db, 'users'))
       ]);
       setMyInviteCodes(inviteSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setMemberCount(memberSnap.size);
-    } catch (err) {
-      console.error(err);
-    }
+      // Exclude admin accounts from founding spot count
+      const nonAdminMembers = memberSnap.docs.filter(d => d.data().role !== 'admin');
+      setMemberCount(nonAdminMembers.length);
+    } catch (err) { console.error(err); }
   };
 
   const generateInviteCode = async () => {
@@ -69,18 +62,12 @@ export default function Profile() {
     try {
       const code = Math.random().toString(36).substring(2, 10).toUpperCase();
       const docRef = await addDoc(collection(db, 'invites'), {
-        code,
-        created_by: userProfile.full_name,
-        created_by_uid: user.uid,
-        used: false,
-        created_at: serverTimestamp()
+        code, created_by: userProfile.full_name,
+        created_by_uid: user.uid, used: false, created_at: serverTimestamp()
       });
       setMyInviteCodes(prev => [...prev, { id: docRef.id, code, used: false }]);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setGeneratingCode(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setGeneratingCode(false); }
   };
 
   const copyCode = (code) => {
@@ -92,10 +79,7 @@ export default function Profile() {
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 500000) {
-      alert('Please use an image under 500KB');
-      return;
-    }
+    if (file.size > 500000) { alert('Please use an image under 500KB'); return; }
     setUploadingPhoto(true);
     try {
       const reader = new FileReader();
@@ -104,40 +88,30 @@ export default function Profile() {
         setUploadingPhoto(false);
       };
       reader.readAsDataURL(file);
-    } catch (err) {
-      console.error(err);
-      setUploadingPhoto(false);
-    }
+    } catch (err) { console.error(err); setUploadingPhoto(false); }
   };
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      await updateProfile(form);
-      setEditing(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
+    try { await updateProfile(form); setEditing(false); }
+    catch (err) { console.error(err); }
+    finally { setSaving(false); }
   };
 
-  if (!userProfile) return <div className="profile-loading">Loading...</div>;
+  if (!userProfile) return <div className="profile-loading">LOADING...</div>;
 
   const spotsLeft = Math.max(0, FOUNDING_LIMIT - memberCount);
 
   return (
     <div className="profile-page">
       <div className="profile-header">
-        <div className="profile-avatar-large" onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
+        <div className="profile-avatar-large" onClick={() => fileInputRef.current?.click()}>
           {userProfile.profile_image ? (
             <img src={userProfile.profile_image} alt="" />
           ) : (
             <span>{userProfile.full_name?.charAt(0) || 'U'}</span>
           )}
-          <div className="avatar-overlay">
-            {uploadingPhoto ? '...' : '📷'}
-          </div>
+          <div className="avatar-overlay">{uploadingPhoto ? '...' : '📷'}</div>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
         <h1 className="profile-name">{userProfile.full_name}</h1>
@@ -155,14 +129,18 @@ export default function Profile() {
           <span className="stat-val">{userProfile.connection_count || 0}</span>
           <span className="stat-lbl">Connections</span>
         </div>
-        <div className="stat-div"></div>
+        <div className="stat-div" />
         <div className="profile-stat">
-          <span className="stat-val">{userProfile.industry || '—'}</span>
+          <span className="stat-val" style={{ fontSize: userProfile.industry ? '14px' : '28px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
+            {userProfile.industry || '—'}
+          </span>
           <span className="stat-lbl">Industry</span>
         </div>
-        <div className="stat-div"></div>
+        <div className="stat-div" />
         <div className="profile-stat">
-          <span className="stat-val">{userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}</span>
+          <span className="stat-val" style={{ fontSize: '16px', fontFamily: 'Montserrat', letterSpacing: '0.02em' }}>
+            {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}
+          </span>
           <span className="stat-lbl">Member Since</span>
         </div>
       </div>
@@ -171,37 +149,32 @@ export default function Profile() {
         <div className="section-header">
           <h3>About</h3>
           <button className="edit-btn" onClick={() => setEditing(!editing)}>
-            {editing ? 'Cancel' : 'Edit'}
+            {editing ? 'Cancel' : 'Edit Profile'}
           </button>
         </div>
         {editing ? (
           <div className="edit-form">
             <div className="form-group">
-              <label className="form-label">FULL NAME</label>
+              <label className="form-label">Full Name</label>
               <input className="input-field" value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label className="form-label">TITLE</label>
+              <label className="form-label">Title</label>
               <input className="input-field" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label className="form-label">COMPANY</label>
+              <label className="form-label">Company</label>
               <input className="input-field" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label className="form-label">INDUSTRY</label>
-              <select
-                className="input-field"
-                value={form.industry}
-                onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
-                style={{ background: '#0a0a0a', cursor: 'pointer' }}
-              >
+              <label className="form-label">Industry</label>
+              <select className="input-field" value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}>
                 <option value="">Select industry...</option>
                 {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">BIO</label>
+              <label className="form-label">Bio</label>
               <textarea className="input-field" rows={4} value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} style={{ resize: 'vertical' }} />
             </div>
             <button className="btn-primary" onClick={handleSave} disabled={saving}>
@@ -212,14 +185,8 @@ export default function Profile() {
           <div className="profile-bio-content">
             <p className="bio-text">{userProfile.bio || 'No bio yet.'}</p>
             <div className="profile-meta">
-              <div className="meta-item">
-                <span className="meta-icon">✉</span>
-                <span>{userProfile.email}</span>
-              </div>
-              <div className="meta-item">
-                <span className="meta-icon">◈</span>
-                <span>Member since {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}</span>
-              </div>
+              <div className="meta-item"><span className="meta-icon">✉</span><span>{userProfile.email}</span></div>
+              <div className="meta-item"><span className="meta-icon">◈</span><span>Member since {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}</span></div>
             </div>
           </div>
         )}
@@ -249,23 +216,19 @@ export default function Profile() {
               </div>
             </div>
             {spotsLeft === 0 ? (
-              <div className="founding-closed">
-                Founding membership is now closed. Inner Circle memberships available.
-              </div>
+              <div className="founding-closed">Founding membership is now closed. Inner Circle memberships available.</div>
             ) : (
-              <button className="btn-secondary" style={{ marginTop: 16 }} onClick={generateInviteCode} disabled={generatingCode}>
+              <button className="btn-secondary" style={{ marginTop: 20 }} onClick={generateInviteCode} disabled={generatingCode}>
                 {generatingCode ? 'GENERATING...' : 'GENERATE INVITE CODE'}
               </button>
             )}
             {myInviteCodes.length > 0 && (
               <div className="my-codes">
-                <div className="codes-label">YOUR INVITE CODES</div>
+                <div className="codes-label">Your Invite Codes</div>
                 {myInviteCodes.map(inv => (
                   <div key={inv.id} className={`code-row ${inv.used ? 'used' : ''}`}>
                     <span className="code-text">{inv.code}</span>
-                    <span className={`code-status ${inv.used ? 'used' : 'active'}`}>
-                      {inv.used ? 'USED' : 'ACTIVE'}
-                    </span>
+                    <span className={`code-status ${inv.used ? 'used' : 'active'}`}>{inv.used ? 'USED' : 'ACTIVE'}</span>
                     {!inv.used && (
                       <button className="copy-code-btn" onClick={() => copyCode(inv.code)}>
                         {copied === inv.code ? 'COPIED!' : 'COPY'}
@@ -281,5 +244,6 @@ export default function Profile() {
     </div>
   );
 }
+
 
 
