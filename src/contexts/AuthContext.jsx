@@ -10,6 +10,8 @@ import { auth, db } from '../firebase';
 
 const AuthContext = createContext({});
 
+const FOUNDING_LIMIT = 50;
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -41,14 +43,24 @@ export function AuthProvider({ children }) {
   const register = async (form) => {
     const { email, password, full_name, title, company, industry, bio, invite_code } = form;
 
-    // Check invite code if provided
+    // Validate invite code if provided
     if (invite_code) {
-      const inviteQ = query(collection(db, 'invites'), where('code', '==', invite_code.toUpperCase()), where('used', '==', false));
+      const inviteQ = query(
+        collection(db, 'invites'),
+        where('code', '==', invite_code.toUpperCase()),
+        where('used', '==', false)
+      );
       const inviteSnap = await getDocs(inviteQ);
       if (inviteSnap.empty) throw new Error('Invalid or already used invite code.');
     }
 
+    // Count current non-admin members to determine founding status
+    const memberSnap = await getDocs(collection(db, 'users'));
+    const nonAdminCount = memberSnap.docs.filter(d => d.data().role !== 'admin').length;
+    const isFoundingMember = nonAdminCount < FOUNDING_LIMIT;
+
     const cred = await createUserWithEmailAndPassword(auth, email, password);
+
     const profile = {
       full_name,
       title,
@@ -57,11 +69,13 @@ export function AuthProvider({ children }) {
       bio,
       email,
       role: 'member',
-      subscription_tier: invite_code ? 'founding' : 'member',
+      subscription_tier: isFoundingMember ? 'founding' : 'member',
+      is_founding_member: isFoundingMember,
       member_since: new Date().toISOString(),
       connection_count: 0,
       profile_image: null,
     };
+
     await setDoc(doc(db, 'users', cred.user.uid), profile);
 
     // Mark invite as used
@@ -69,7 +83,10 @@ export function AuthProvider({ children }) {
       const inviteQ2 = query(collection(db, 'invites'), where('code', '==', invite_code.toUpperCase()));
       const inviteSnap2 = await getDocs(inviteQ2);
       if (!inviteSnap2.empty) {
-        await updateDoc(doc(db, 'invites', inviteSnap2.docs[0].id), { used: true, used_by: cred.user.uid });
+        await updateDoc(doc(db, 'invites', inviteSnap2.docs[0].id), {
+          used: true,
+          used_by: cred.user.uid
+        });
       }
     }
 
@@ -98,5 +115,6 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
+
 
 
