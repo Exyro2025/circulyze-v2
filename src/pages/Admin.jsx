@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Admin.css';
 
 export default function Admin() {
-  const { profile } = useAuth();
+  const { userProfile } = useAuth();
   const [tab, setTab] = useState('overview');
   const [members, setMembers] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -20,7 +20,7 @@ export default function Admin() {
       const [mSnap, aSnap, pSnap] = await Promise.all([
         getDocs(collection(db, 'users')),
         getDocs(query(collection(db, 'applications'), orderBy('createdAt', 'desc'))),
-        getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'))),
+        getDocs(query(collection(db, 'posts'), orderBy('created_at', 'desc'))),
       ]);
       setMembers(mSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       setApplications(aSnap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -49,7 +49,7 @@ export default function Admin() {
     setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
   }
 
-  if (profile?.role !== 'admin') return (
+  if (userProfile?.role !== 'admin') return (
     <div className="admin-denied">
       <p>Access restricted to administrators.</p>
     </div>
@@ -104,13 +104,13 @@ export default function Admin() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Name</th><th>Email</th><th>Role</th><th>Tier</th><th>Actions</th>
+                    <th>Name</th><th>Email</th><th>Role</th><th>Tier</th><th>Joined</th>
                   </tr>
                 </thead>
                 <tbody>
                   {members.map(m => (
                     <tr key={m.id}>
-                      <td>{m.displayName || '—'}</td>
+                      <td>{m.full_name || '—'}</td>
                       <td className="td-dim">{m.email}</td>
                       <td>
                         <select
@@ -122,8 +122,8 @@ export default function Admin() {
                           <option value="admin">Admin</option>
                         </select>
                       </td>
-                      <td className="td-dim">{m.tier || 'founding'}</td>
-                      <td><span className="td-dim">{new Date(m.createdAt).toLocaleDateString()}</span></td>
+                      <td className="td-dim">{m.subscription_tier || 'founding'}</td>
+                      <td className="td-dim">{m.member_since ? new Date(m.member_since).toLocaleDateString() : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -166,10 +166,10 @@ export default function Admin() {
                 <tbody>
                   {posts.map(p => (
                     <tr key={p.id}>
-                      <td>{p.authorName}</td>
-                      <td className="td-preview">{p.text?.slice(0, 80)}...</td>
+                      <td>{p.author_name || '—'}</td>
+                      <td className="td-preview">{p.content?.slice(0, 80)}...</td>
                       <td className="td-dim">{p.likes?.length || 0}</td>
-                      <td className="td-dim">{p.createdAt?.toDate?.()?.toLocaleDateString() || '—'}</td>
+                      <td className="td-dim">{p.created_at?.toDate?.()?.toLocaleDateString() || '—'}</td>
                       <td>
                         <button className="btn-delete-sm" onClick={() => deletePost(p.id)}>Remove</button>
                       </td>
