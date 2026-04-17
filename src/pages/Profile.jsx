@@ -6,6 +6,15 @@ import './Profile.css';
 
 const FOUNDING_LIMIT = 50;
 
+const INDUSTRIES = [
+  'Technology & AI', 'Finance & Investment', 'Private Equity & VC',
+  'Healthcare & Biotech', 'Real Estate & Development', 'Law & Legal',
+  'Energy & Sustainability', 'Media & Entertainment', 'Government & Policy',
+  'Aerospace & Defense', 'Sports & Athletics', 'Luxury & Fashion',
+  'Hospitality & Travel', 'Agriculture & Food', 'Telecommunications',
+  'Consulting', 'Manufacturing', 'Other'
+];
+
 export default function Profile() {
   const { user, userProfile, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -27,6 +36,19 @@ export default function Profile() {
   useEffect(() => {
     loadInviteData();
   }, []);
+
+  // Keep form in sync if userProfile loads after mount
+  useEffect(() => {
+    if (userProfile) {
+      setForm({
+        full_name: userProfile.full_name || '',
+        title: userProfile.title || '',
+        company: userProfile.company || '',
+        industry: userProfile.industry || '',
+        bio: userProfile.bio || '',
+      });
+    }
+  }, [userProfile]);
 
   const loadInviteData = async () => {
     try {
@@ -167,6 +189,18 @@ export default function Profile() {
               <input className="input-field" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} />
             </div>
             <div className="form-group">
+              <label className="form-label">INDUSTRY</label>
+              <select
+                className="input-field"
+                value={form.industry}
+                onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
+                style={{ background: '#0a0a0a', cursor: 'pointer' }}
+              >
+                <option value="">Select industry...</option>
+                {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
               <label className="form-label">BIO</label>
               <textarea className="input-field" rows={4} value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} style={{ resize: 'vertical' }} />
             </div>
@@ -247,4 +281,5 @@ export default function Profile() {
     </div>
   );
 }
+
 
