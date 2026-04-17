@@ -40,30 +40,6 @@ const ENGINES = [
     ]
   },
   {
-    id: 'deal',
-    icon: '◇',
-    label: 'Deal Rooms',
-    desc: 'Private AI collaboration with synergy briefings',
-    system: `You are the Deal Room AI for Circulyze. You facilitate private, high-stakes strategic collaboration. Analyze deals, partnerships, and strategic opportunities with the precision of a top-tier investment banker and strategic advisor. Focus on value creation, risk assessment, and synergy identification.`,
-    starters: [
-      'Analyze the key risks in a strategic partnership structure',
-      'What makes a deal term sheet favorable for the acquirer?',
-      'How should I structure an equity-for-advisory arrangement?',
-    ]
-  },
-  {
-    id: 'intros',
-    icon: '◆',
-    label: 'Smart Intros',
-    desc: 'AI-curated connection recommendations',
-    system: `You are the Smart Intros engine for Circulyze. You identify high-value connection opportunities between members based on complementary strengths, shared objectives, and strategic fit. Explain why specific connections would create mutual value with precision and specificity.`,
-    starters: [
-      'Who in my network would benefit from a connection with a fintech operator?',
-      'What type of advisor would most accelerate my current stage?',
-      'How do I approach a cold introduction to a strategic partner?',
-    ]
-  },
-  {
     id: 'influence',
     icon: '○',
     label: 'Influence Score',
@@ -73,6 +49,18 @@ const ENGINES = [
       'How do I build credibility in a new industry I\'m entering?',
       'What signals indicate genuine influence vs surface-level visibility?',
       'How should I think about building authority through content at the executive level?',
+    ]
+  },
+  {
+    id: 'deal',
+    icon: '◇',
+    label: 'Deal Rooms',
+    desc: 'Private AI collaboration with synergy briefings',
+    system: `You are the Deal Room AI for Circulyze. You facilitate private, high-stakes strategic collaboration. Analyze deals, partnerships, and strategic opportunities with the precision of a top-tier investment banker and strategic advisor. Focus on value creation, risk assessment, and synergy identification.`,
+    starters: [
+      'Analyze the key risks in a strategic partnership structure',
+      'What makes a deal term sheet favorable for the acquirer?',
+      'How should I structure an equity-for-advisory arrangement?',
     ]
   },
   {
@@ -90,7 +78,6 @@ const ENGINES = [
 ];
 
 export default function Insights() {
-  const { user } = useAuth();
   const [activeEngine, setActiveEngine] = useState('collective');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -110,7 +97,10 @@ export default function Insights() {
     setInput('');
     setLoading(true);
 
-    const history = messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+    const history = messages.map(m => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text
+    }));
     history.push({ role: 'user', content: userMsg.text });
 
     try {
@@ -150,7 +140,7 @@ export default function Insights() {
       <div className="engines-panel">
         <div className="engines-header">
           <span className="engines-eyebrow">POWERED BY AI</span>
-          <h2 className="engines-title">Seven Engines<br />of Intelligence</h2>
+          <h2 className="engines-title">Six Engines<br />of Intelligence</h2>
         </div>
         <div className="engines-list">
           {ENGINES.map(e => (
@@ -232,4 +222,5 @@ export default function Insights() {
     </div>
   );
 }
+
 
