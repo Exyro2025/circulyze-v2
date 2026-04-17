@@ -1,15 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
-
-.network-page { padding: 48px 32px 100px; max-width: 1100px; margin: 0 auto; }
-
-.network-header { padding-bottom: 28px; border-bottom: 1px solid rgba(201,169,108,0.08); margin-bottom: 32px; }
-.network-header h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 48px; font-weight: 300; color: #e8e0d0;
-  margin-bottom: 8px;
-}
-.network-meta { font-size: 11px; color: rgba(232,224,208,0.3); display: flex; gap: 10px; align-items: center; letter-spacing: 0.05em; }
-.dot { color: rgba(201,169,108,0.3); }
+01,169,108,0.3); }
 
 .network-tabs { display: flex; border-bottom: 1px solid rgba(201,169,108,0.08); margin-bottom: 32px; }
 .feed-tab {
@@ -117,3 +106,31 @@
 .rsvp-btn.attending { background: #C9A96C; color: #000; border-color: #C9A96C; }
 
 @media (max-width: 600px) { .network-filters { flex-direction: column; } .filter-select { min-width: unset; } }
+
+/* SMART INTRO TOAST */
+.smart-intro-toast { background: rgba(201,169,108,0.06); border: 1px solid rgba(201,169,108,0.2); padding: 20px 24px; margin-bottom: 24px; }
+.smart-intro-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.smart-intro-label { font-size: 9px; letter-spacing: 0.25em; color: #C9A96C; font-family: 'Montserrat', sans-serif; font-weight: 600; }
+.smart-intro-close { background: none; border: none; color: rgba(232,224,208,0.3); cursor: pointer; font-size: 12px; }
+.smart-intro-name { font-family: 'Montserrat', sans-serif; font-size: 11px; color: rgba(232,224,208,0.4); margin-bottom: 8px; }
+.smart-intro-message { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 300; font-style: italic; color: rgba(232,224,208,0.7); line-height: 1.6; }
+
+/* AI RECOMMENDATIONS */
+.ai-recs-section { display: flex; flex-direction: column; gap: 16px; }
+.ai-recs-header { margin-bottom: 8px; }
+.ai-recs-eyebrow { font-size: 9px; letter-spacing: 0.25em; color: #C9A96C; font-family: 'Montserrat', sans-serif; font-weight: 600; display: block; margin-bottom: 8px; }
+.ai-recs-desc { font-size: 12px; color: rgba(232,224,208,0.3); font-family: 'Montserrat', sans-serif; font-weight: 300; }
+.rec-card { background: #080808; border: 1px solid rgba(201,169,108,0.08); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; transition: border-color 0.2s; }
+.rec-card:hover { border-color: rgba(201,169,108,0.18); }
+.rec-card-left { display: flex; align-items: center; gap: 16px; flex: 1; }
+.rec-reason { font-size: 11px; color: rgba(201,169,108,0.6); font-family: 'Montserrat', sans-serif; font-weight: 300; margin-top: 4px; font-style: italic; }
+
+/* FORM FIELDS IN NETWORK */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 9px; letter-spacing: 0.3em; color: rgba(232,224,208,0.3); font-family: 'Montserrat', sans-serif; }
+.input-field { background: rgba(201,169,108,0.02); border: 1px solid rgba(201,169,108,0.1); border-bottom-color: rgba(201,169,108,0.25); color: #e8e0d0; padding: 12px 14px; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300; outline: none; width: 100%; transition: border-color 0.2s; }
+.input-field:focus { border-color: rgba(201,169,108,0.35); }
+.btn-primary { padding: 12px 32px; background: #C9A96C; color: #000; border: none; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.25em; cursor: pointer; transition: all 0.2s; }
+.btn-primary:hover { background: #d4b87a; }
+.btn-primary:disabled { opacity: 0.35; cursor: default; }
+
