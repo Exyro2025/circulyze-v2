@@ -1,234 +1,250 @@
-import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
-import { db } from '../firebase';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 import './Profile.css';
 
+const FOUNDING_LIMIT = 50;
+
 export default function Profile() {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState({
-    displayName: '',
-    title: '',
-    company: '',
-    bio: '',
-    location: '',
-    website: '',
-    linkedin: '',
-    industry: '',
-    focus: '',
-  });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { user, userProfile, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    full_name: userProfile?.full_name || '',
+    title: userProfile?.title || '',
+    company: userProfile?.company || '',
+    industry: userProfile?.industry || '',
+    bio: userProfile?.bio || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [myInviteCodes, setMyInviteCodes] = useState([]);
+  const [memberCount, setMemberCount] = useState(0);
+  const [copied, setCopied] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
-    loadProfile();
-  }, [user]);
+    loadInviteData();
+  }, []);
 
-  async function loadProfile() {
+  const loadInviteData = async () => {
     try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const data = snap.data();
-        setProfile({
-          displayName: data.displayName || user.displayName || '',
-          title: data.title || '',
-          company: data.company || '',
-          bio: data.bio || '',
-          location: data.location || '',
-          website: data.website || '',
-          linkedin: data.linkedin || '',
-          industry: data.industry || '',
-          focus: data.focus || '',
-        });
-      } else {
-        setProfile(p => ({ ...p, displayName: user.displayName || '' }));
-      }
-    } catch (e) { console.error(e); }
-    setLoading(false);
-  }
+      const [inviteSnap, memberSnap] = await Promise.all([
+        getDocs(query(collection(db, 'invites'), where('created_by_uid', '==', user.uid))),
+        getDocs(collection(db, 'users'))
+      ]);
+      setMyInviteCodes(inviteSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setMemberCount(memberSnap.size);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  async function saveProfile() {
+  const generateInviteCode = async () => {
+    if (memberCount >= FOUNDING_LIMIT) return;
+    setGeneratingCode(true);
+    try {
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const docRef = await addDoc(collection(db, 'invites'), {
+        code,
+        created_by: userProfile.full_name,
+        created_by_uid: user.uid,
+        used: false,
+        created_at: serverTimestamp()
+      });
+      setMyInviteCodes(prev => [...prev, { id: docRef.id, code, used: false }]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
+
+  const copyCode = (code) => {
+    navigator.clipboard.writeText(code);
+    setCopied(code);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 500000) {
+      alert('Please use an image under 500KB');
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        await updateProfile({ profile_image: reader.result });
+        setUploadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, 'users', user.uid), {
-        ...profile,
-        email: user.email,
-        updatedAt: Date.now(),
-      }, { merge: true });
-      if (profile.displayName) {
-        await updateProfile(user, { displayName: profile.displayName });
-      }
-      setSaved(true);
+      await updateProfile(form);
       setEditing(false);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e) { console.error(e); }
-    setSaving(false);
-  }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  function initials() {
-    const name = profile.displayName || user?.email || 'U';
-    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  }
+  if (!userProfile) return <div className="profile-loading">Loading...</div>;
 
-  if (loading) return (
-    <div className="profile-loading">
-      <span className="loading-dot" /><span className="loading-dot" /><span className="loading-dot" />
-    </div>
-  );
+  const spotsLeft = Math.max(0, FOUNDING_LIMIT - memberCount);
 
   return (
     <div className="profile-page">
-      <div className="profile-container">
-        {/* Header */}
-        <div className="profile-header">
-          <div className="profile-avatar-lg">{initials()}</div>
-          <div className="profile-header-info">
-            <span className="profile-eyebrow">MEMBER PROFILE</span>
-            <h1 className="profile-name">{profile.displayName || 'Your Name'}</h1>
-            {profile.title && <div className="profile-title-text">{profile.title}</div>}
-            {profile.company && <div className="profile-company">{profile.company}</div>}
-            <div className="profile-email">{user?.email}</div>
-          </div>
-          <div className="profile-header-actions">
-            {!editing ? (
-              <button className="btn-edit" onClick={() => setEditing(true)}>Edit Profile</button>
-            ) : (
-              <div className="edit-actions">
-                <button className="btn-cancel" onClick={() => { setEditing(false); loadProfile(); }}>Cancel</button>
-                <button className="btn-save" onClick={saveProfile} disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            )}
-            {saved && <span className="saved-msg">✓ Saved</span>}
+      <div className="profile-header">
+        <div className="profile-avatar-large" onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
+          {userProfile.profile_image ? (
+            <img src={userProfile.profile_image} alt="" />
+          ) : (
+            <span>{userProfile.full_name?.charAt(0) || 'U'}</span>
+          )}
+          <div className="avatar-overlay">
+            {uploadingPhoto ? '...' : '📷'}
           </div>
         </div>
-
-        <div className="profile-body">
-          {/* Left column */}
-          <div className="profile-main">
-            {/* Bio */}
-            <div className="profile-section">
-              <h3 className="section-label">About</h3>
-              {editing ? (
-                <textarea
-                  className="profile-textarea"
-                  placeholder="Your bio — who you are, what you lead, what you're building..."
-                  value={profile.bio}
-                  onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))}
-                  rows={5}
-                />
-              ) : (
-                <p className="profile-bio-text">
-                  {profile.bio || <span className="empty-field">Add your bio to tell your story.</span>}
-                </p>
-              )}
-            </div>
-
-            {/* Focus */}
-            <div className="profile-section">
-              <h3 className="section-label">Current Focus</h3>
-              {editing ? (
-                <input
-                  className="profile-input"
-                  placeholder="What are you working on right now?"
-                  value={profile.focus}
-                  onChange={e => setProfile(p => ({ ...p, focus: e.target.value }))}
-                />
-              ) : (
-                <p className="profile-field-text">
-                  {profile.focus || <span className="empty-field">Add your current focus.</span>}
-                </p>
-              )}
-            </div>
+        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+        <h1 className="profile-name">{userProfile.full_name}</h1>
+        <p className="profile-title">{userProfile.title}</p>
+        <p className="profile-company">{userProfile.company}</p>
+        {userProfile.subscription_tier && (
+          <div className="profile-tier">
+            <span className="tier-badge">◈ {userProfile.subscription_tier?.toUpperCase()}</span>
           </div>
+        )}
+      </div>
 
-          {/* Right column */}
-          <div className="profile-sidebar">
-            <div className="profile-section">
-              <h3 className="section-label">Details</h3>
-              <div className="profile-fields">
-                <div className="profile-field-row">
-                  <span className="field-label">Name</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.displayName} onChange={e => setProfile(p => ({ ...p, displayName: e.target.value }))} placeholder="Full name" />
-                  ) : (
-                    <span className="field-value">{profile.displayName || <span className="empty-field">—</span>}</span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">Title</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.title} onChange={e => setProfile(p => ({ ...p, title: e.target.value }))} placeholder="CEO, Founder, Managing Director..." />
-                  ) : (
-                    <span className="field-value">{profile.title || <span className="empty-field">—</span>}</span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">Company</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.company} onChange={e => setProfile(p => ({ ...p, company: e.target.value }))} placeholder="Company name" />
-                  ) : (
-                    <span className="field-value">{profile.company || <span className="empty-field">—</span>}</span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">Industry</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.industry} onChange={e => setProfile(p => ({ ...p, industry: e.target.value }))} placeholder="Technology, Finance, Healthcare..." />
-                  ) : (
-                    <span className="field-value">{profile.industry || <span className="empty-field">—</span>}</span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">Location</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.location} onChange={e => setProfile(p => ({ ...p, location: e.target.value }))} placeholder="City, Country" />
-                  ) : (
-                    <span className="field-value">{profile.location || <span className="empty-field">—</span>}</span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">Website</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.website} onChange={e => setProfile(p => ({ ...p, website: e.target.value }))} placeholder="https://..." />
-                  ) : (
-                    <span className="field-value">
-                      {profile.website
-                        ? <a href={profile.website} target="_blank" rel="noreferrer" className="field-link">{profile.website}</a>
-                        : <span className="empty-field">—</span>}
-                    </span>
-                  )}
-                </div>
-                <div className="profile-field-row">
-                  <span className="field-label">LinkedIn</span>
-                  {editing ? (
-                    <input className="profile-input-sm" value={profile.linkedin} onChange={e => setProfile(p => ({ ...p, linkedin: e.target.value }))} placeholder="linkedin.com/in/..." />
-                  ) : (
-                    <span className="field-value">
-                      {profile.linkedin
-                        ? <a href={profile.linkedin} target="_blank" rel="noreferrer" className="field-link">{profile.linkedin}</a>
-                        : <span className="empty-field">—</span>}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="profile-section">
-              <h3 className="section-label">Membership</h3>
-              <div className="membership-card">
-                <span className="membership-tier">Founding Member</span>
-                <span className="membership-status">✓ Active</span>
-              </div>
-            </div>
-          </div>
+      <div className="profile-stats">
+        <div className="profile-stat">
+          <span className="stat-val">{userProfile.connection_count || 0}</span>
+          <span className="stat-lbl">Connections</span>
+        </div>
+        <div className="stat-div"></div>
+        <div className="profile-stat">
+          <span className="stat-val">{userProfile.industry || '—'}</span>
+          <span className="stat-lbl">Industry</span>
+        </div>
+        <div className="stat-div"></div>
+        <div className="profile-stat">
+          <span className="stat-val">{userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}</span>
+          <span className="stat-lbl">Member Since</span>
         </div>
       </div>
+
+      <div className="profile-section">
+        <div className="section-header">
+          <h3>About</h3>
+          <button className="edit-btn" onClick={() => setEditing(!editing)}>
+            {editing ? 'Cancel' : 'Edit'}
+          </button>
+        </div>
+        {editing ? (
+          <div className="edit-form">
+            <div className="form-group">
+              <label className="form-label">FULL NAME</label>
+              <input className="input-field" value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">TITLE</label>
+              <input className="input-field" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">COMPANY</label>
+              <input className="input-field" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">BIO</label>
+              <textarea className="input-field" rows={4} value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} style={{ resize: 'vertical' }} />
+            </div>
+            <button className="btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'SAVING...' : 'SAVE CHANGES'}
+            </button>
+          </div>
+        ) : (
+          <div className="profile-bio-content">
+            <p className="bio-text">{userProfile.bio || 'No bio yet.'}</p>
+            <div className="profile-meta">
+              <div className="meta-item">
+                <span className="meta-icon">✉</span>
+                <span>{userProfile.email}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-icon">◈</span>
+                <span>Member since {userProfile.member_since ? new Date(userProfile.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!editing && (
+        <div className="profile-section">
+          <h3>Subscription</h3>
+          <div className="subscription-badge">
+            <span className="sub-icon">◈</span>
+            <span className="sub-label">{userProfile.subscription_tier?.toUpperCase() || 'FOUNDING'}</span>
+          </div>
+        </div>
+      )}
+
+      {!editing && (
+        <div className="profile-section">
+          <div className="invite-card">
+            <div className="invite-header">
+              <div>
+                <h3>Invite a Leader</h3>
+                <p>Share your invite code to bring exceptional leaders into the circle.</p>
+              </div>
+              <div className="founding-spots">
+                <span className="spots-num">{spotsLeft}</span>
+                <span className="spots-lbl">Founding spots left</span>
+              </div>
+            </div>
+            {spotsLeft === 0 ? (
+              <div className="founding-closed">
+                Founding membership is now closed. Inner Circle memberships available.
+              </div>
+            ) : (
+              <button className="btn-secondary" style={{ marginTop: 16 }} onClick={generateInviteCode} disabled={generatingCode}>
+                {generatingCode ? 'GENERATING...' : 'GENERATE INVITE CODE'}
+              </button>
+            )}
+            {myInviteCodes.length > 0 && (
+              <div className="my-codes">
+                <div className="codes-label">YOUR INVITE CODES</div>
+                {myInviteCodes.map(inv => (
+                  <div key={inv.id} className={`code-row ${inv.used ? 'used' : ''}`}>
+                    <span className="code-text">{inv.code}</span>
+                    <span className={`code-status ${inv.used ? 'used' : 'active'}`}>
+                      {inv.used ? 'USED' : 'ACTIVE'}
+                    </span>
+                    {!inv.used && (
+                      <button className="copy-code-btn" onClick={() => copyCode(inv.code)}>
+                        {copied === inv.code ? 'COPIED!' : 'COPY'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
