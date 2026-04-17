@@ -93,4 +93,21 @@
 .feed-empty h3 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: rgba(232,224,208,0.2); margin-bottom: 8px; }
 .feed-empty p { font-size: 11px; font-weight: 300; letter-spacing: 0.1em; color: rgba(232,224,208,0.15); }
 
+/* ARTICLES */
+.article-card { background: #080808; padding: 28px 32px; transition: background 0.2s; }
+.article-card:hover { background: rgba(201,169,108,0.02); }
+.article-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #e8e0d0; margin-bottom: 16px; line-height: 1.2; }
+.article-body { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300; color: rgba(232,224,208,0.6); line-height: 1.9; margin-bottom: 20px; white-space: pre-wrap; }
+
+/* ARTICLE COMPOSE */
+.article-compose { background: rgba(201,169,108,0.02); border: 1px solid rgba(201,169,108,0.1); padding: 24px; margin-bottom: 40px; }
+.article-compose-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: rgba(232,224,208,0.4); }
+.article-cancel { background: none; border: none; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.1em; color: rgba(232,224,208,0.3); cursor: pointer; transition: color 0.2s; }
+.article-cancel:hover { color: #C9A96C; }
+.article-title-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(201,169,108,0.15); color: #e8e0d0; font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; outline: none; padding-bottom: 12px; margin-bottom: 20px; }
+.article-title-input::placeholder { color: rgba(232,224,208,0.15); }
+.article-body-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(201,169,108,0.1); color: #e8e0d0; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300; outline: none; resize: none; padding-bottom: 12px; margin-bottom: 16px; line-height: 1.8; }
+.article-body-input::placeholder { color: rgba(232,224,208,0.15); }
+
+
 
