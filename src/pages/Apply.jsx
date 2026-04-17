@@ -1,83 +1,102 @@
 import { useState } from 'react';
-import { addDoc, collection } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Link } from 'react-router-dom';
-import './Apply.css';
+import './Auth.css';
+
+const INDUSTRIES = [
+  'Technology & AI', 'Finance & Investment', 'Private Equity & VC',
+  'Healthcare & Biotech', 'Real Estate & Development', 'Law & Legal',
+  'Energy & Sustainability', 'Media & Entertainment', 'Government & Policy',
+  'Aerospace & Defense', 'Sports & Athletics', 'Luxury & Fashion',
+  'Hospitality & Travel', 'Agriculture & Food', 'Telecommunications',
+  'Consulting', 'Manufacturing', 'Other'
+];
 
 export default function Apply() {
-  const [form, setForm] = useState({ name: '', email: '', title: '', company: '', why: '', linkedin: '' });
+  const [form, setForm] = useState({ full_name: '', email: '', title: '', company: '', industry: '', linkedin_url: '', reason: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
+  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await addDoc(collection(db, 'applications'), { ...form, status: 'pending', createdAt: Date.now() });
+      await addDoc(collection(db, 'applications'), { ...form, status: 'pending', created_at: serverTimestamp() });
       setSubmitted(true);
-    } catch (err) { console.error(err); }
-    setLoading(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="auth-page">
+        <div className="auth-container">
+          <div className="auth-logo" onClick={() => navigate('/')}>Circulyze</div>
+          <div className="auth-brand-circle">✓</div>
+          <h1 className="auth-title">APPLICATION RECEIVED</h1>
+          <div className="gold-divider"></div>
+          <p className="auth-subtitle" style={{ marginBottom: 32 }}>Our team will review your application within 5-7 business days.</p>
+          <button className="btn-secondary" onClick={() => navigate('/')}>RETURN HOME</button>
+        </div>
+      </div>
+    );
   }
 
-  if (submitted) return (
-    <div className="apply-page">
-      <div className="apply-success">
-        <div className="success-icon">◈</div>
-        <h2>Application Received</h2>
-        <p>We review every application personally. You'll hear from us within 48 hours.</p>
-        <Link to="/" className="back-link">Return to Circulyze</Link>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="apply-page">
-      <div className="apply-container">
-        <Link to="/" className="apply-logo">Circulyze</Link>
-        <div className="apply-header">
-          <span className="apply-eyebrow">INVITE-ONLY NETWORK</span>
-          <h1 className="apply-title">Apply for Membership</h1>
-          <p className="apply-subtitle">Every application is reviewed by a human. Only proven leaders are accepted.</p>
-        </div>
-        <form className="apply-form" onSubmit={handleSubmit}>
-          <div className="apply-row">
-            <div className="apply-field">
-              <label className="apply-label">Full Name</label>
-              <input className="apply-input" value={form.name} onChange={set('name')} placeholder="Your full name" required />
+    <div className="auth-page">
+      <div className="auth-container" style={{ maxWidth: 560 }}>
+        <div className="auth-logo" onClick={() => navigate('/')}>Circulyze</div>
+        <h1 className="auth-title">APPLY FOR MEMBERSHIP</h1>
+        <div className="gold-divider"></div>
+        <p className="auth-subtitle">Tell us about yourself</p>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="register-grid">
+            <div className="form-group full">
+              <label className="form-label">FULL NAME</label>
+              <input type="text" name="full_name" className="input-field" value={form.full_name} onChange={handleChange} required />
             </div>
-            <div className="apply-field">
-              <label className="apply-label">Email</label>
-              <input className="apply-input" type="email" value={form.email} onChange={set('email')} placeholder="your@email.com" required />
+            <div className="form-group">
+              <label className="form-label">EMAIL</label>
+              <input type="email" name="email" className="input-field" value={form.email} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">TITLE</label>
+              <input type="text" name="title" className="input-field" value={form.title} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">COMPANY</label>
+              <input type="text" name="company" className="input-field" value={form.company} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">INDUSTRY</label>
+              <select name="industry" className="input-field" value={form.industry} onChange={handleChange} required style={{ background: '#1a1a1a', cursor: 'pointer' }}>
+                <option value="">Select Industry</option>
+                {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+              </select>
+            </div>
+            <div className="form-group full">
+              <label className="form-label">LINKEDIN URL (OPTIONAL)</label>
+              <input type="url" name="linkedin_url" className="input-field" value={form.linkedin_url} onChange={handleChange} />
+            </div>
+            <div className="form-group full">
+              <label className="form-label">WHY DO YOU WANT TO JOIN?</label>
+              <textarea name="reason" className="input-field" value={form.reason} onChange={handleChange} required rows={4} style={{ resize: 'vertical' }} />
             </div>
           </div>
-          <div className="apply-row">
-            <div className="apply-field">
-              <label className="apply-label">Title</label>
-              <input className="apply-input" value={form.title} onChange={set('title')} placeholder="CEO, Founder, Managing Director..." required />
-            </div>
-            <div className="apply-field">
-              <label className="apply-label">Company</label>
-              <input className="apply-input" value={form.company} onChange={set('company')} placeholder="Company name" required />
-            </div>
-          </div>
-          <div className="apply-field">
-            <label className="apply-label">LinkedIn Profile</label>
-            <input className="apply-input" value={form.linkedin} onChange={set('linkedin')} placeholder="linkedin.com/in/..." />
-          </div>
-          <div className="apply-field">
-            <label className="apply-label">Why Circulyze?</label>
-            <textarea className="apply-textarea" value={form.why} onChange={set('why')} placeholder="Tell us about your vision, what you're building, and what you'd contribute to this circle..." rows={5} required />
-          </div>
-          <button className="apply-btn" type="submit" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit Application →'}
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'SUBMITTING...' : 'SUBMIT APPLICATION'}
           </button>
         </form>
-        <div className="apply-footer">
-          <Link to="/login" className="apply-link">Already a member? Sign In</Link>
-        </div>
+        <p className="register-back" onClick={() => navigate('/')}>← Back to Home</p>
       </div>
     </div>
   );
 }
+
