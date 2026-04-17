@@ -7,7 +7,7 @@
   border: 1px solid var(--gold-border); background: var(--gold-faint);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-serif); font-size: 32px; color: var(--gold);
-  margin: 0 auto 16px; overflow: hidden; position: relative; cursor: pointer;
+  margin: 0 auto 12px; overflow: hidden; position: relative; cursor: pointer;
 }
 .avatar-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); text-align: center; font-size: 13px; padding: 5px 0; opacity: 0; transition: opacity 0.2s; }
 .profile-avatar-large:hover .avatar-overlay { opacity: 1; }
@@ -23,7 +23,7 @@
 .badge-inner { color: var(--gold); border-color: var(--gold-border); }
 .badge-member { color: var(--ivory-ghost); border-color: rgba(240,236,224,0.08); }
 
-.profile-stats { display: flex; justify-content: center; align-items: center; gap: 48px; padding: 24px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+.profile-stats { display: flex; justify-content: center; align-items: center; gap: 48px; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
 .profile-stat { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .stat-val { font-family: var(--font-serif); font-size: 26px; font-weight: 300; color: var(--gold); line-height: 1; }
 .stat-lbl { font-size: 8px; letter-spacing: 0.25em; color: var(--ivory-ghost); text-transform: uppercase; font-family: var(--font-sans); }
