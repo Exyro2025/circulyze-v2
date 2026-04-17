@@ -99,6 +99,20 @@
 .btn-secondary:hover { background: rgba(201,169,108,0.06); border-color: #C9A96C; }
 .btn-secondary:disabled { opacity: 0.35; cursor: default; }
 
+/* BADGES */
+.badge-founder { color: #C9A96C; border-color: rgba(201,169,108,0.4); background: rgba(201,169,108,0.08); }
+.badge-founding { color: #e8e0d0; border-color: rgba(232,224,208,0.2); }
+.badge-inner { color: #C9A96C; border-color: rgba(201,169,108,0.3); }
+.badge-member { color: rgba(232,224,208,0.3); border-color: rgba(232,224,208,0.1); }
+
+/* UPGRADE CARD */
+.upgrade-card { border: 1px solid rgba(201,169,108,0.15); padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+.upgrade-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: #e8e0d0; }
+.upgrade-price { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: #C9A96C; line-height: 1; }
+.upgrade-price span { font-size: 16px; color: rgba(232,224,208,0.3); font-family: 'Montserrat', sans-serif; }
+.upgrade-desc { font-size: 12px; font-weight: 300; color: rgba(232,224,208,0.4); line-height: 1.8; font-family: 'Montserrat', sans-serif; }
+
+
 
 
 
