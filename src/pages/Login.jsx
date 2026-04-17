@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebase';
-import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 export default function Login() {
@@ -9,60 +10,105 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await login(email, password);
       navigate('/feed');
     } catch (err) {
-      setError('Invalid email or password.');
+      setError('Invalid email or password');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetSent(true);
+    } catch (err) {
+      setError('Email not found. Please check and try again.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  if (showForgot) {
+    return (
+      <div className="auth-page">
+        <div className="auth-container">
+          <div className="auth-logo" onClick={() => navigate('/')}>Circulyze</div>
+          <h1 className="auth-title">RESET PASSWORD</h1>
+          <div className="gold-divider"></div>
+          {resetSent ? (
+            <>
+              <p className="auth-subtitle" style={{ color: '#C9A84C', marginBottom: 32 }}>
+                Reset link sent! Check your email.
+              </p>
+              <button className="btn-primary" onClick={() => { setShowForgot(false); setResetSent(false); }}>
+                BACK TO SIGN IN
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="auth-subtitle">Enter your email to receive a reset link</p>
+              {error && <div className="auth-error">{error}</div>}
+              <form onSubmit={handleForgotPassword} className="auth-form">
+                <div className="form-group">
+                  <label className="form-label">EMAIL</label>
+                  <input type="email" className="input-field" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn-primary" disabled={resetLoading}>
+                  {resetLoading ? 'SENDING...' : 'SEND RESET LINK'}
+                </button>
+              </form>
+              <p className="auth-link" onClick={() => setShowForgot(false)}>← Back to Sign In</p>
+            </>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-logo">Circulyze</div>
-        <p className="auth-tagline">Intelligence in Circulation</p>
+      <div className="auth-container">
+        <div className="auth-logo" onClick={() => navigate('/')}>Circulyze</div>
+        <div className="auth-brand-circle">CZ</div>
+        <h1 className="auth-title">CIRCULYZE</h1>
+        <div className="gold-divider"></div>
+        <p className="auth-subtitle">Sign in to your exclusive network</p>
+        {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
-          <div className="auth-field">
-            <label className="auth-label">Email</label>
-            <input
-              className="auth-input"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-            />
+          <div className="form-group">
+            <label className="form-label">EMAIL</label>
+            <input type="email" className="input-field" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
-          <div className="auth-field">
-            <label className="auth-label">Password</label>
-            <input
-              className="auth-input"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+          <div className="form-group">
+            <label className="form-label">PASSWORD</label>
+            <input type="password" className="input-field" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
-          {error && <p className="auth-error">{error}</p>}
-          <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? 'Signing In...' : 'Enter Circulyze'}
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
         </form>
-        <div className="auth-footer">
-          <Link to="/apply" className="auth-link">Apply for Membership</Link>
-          <span className="auth-sep">·</span>
-          <Link to="/" className="auth-link">Back to Home</Link>
-        </div>
+        <p className="auth-link" onClick={() => setShowForgot(true)}>Forgot Password?</p>
+        <div className="auth-divider"><span>NEW TO CIRCULYZE?</span></div>
+        <button className="btn-secondary" onClick={() => navigate('/register')}>JOIN WITH INVITE CODE</button>
+        <button className="auth-apply" onClick={() => navigate('/apply')}>Apply for Membership →</button>
       </div>
     </div>
   );
 }
+
