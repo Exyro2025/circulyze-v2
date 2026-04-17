@@ -1,116 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
+.profile-page { padding: 40px 32px 100px; max-width: 680px; margin: 0 auto; }
+.profile-loading { text-align: center; padding: 80px; font-size: 9px; letter-spacing: 0.35em; color: var(--ivory-ghost); font-family: var(--font-sans); text-transform: uppercase; }
 
-.profile-page { padding: 48px 32px 100px; max-width: 720px; margin: 0 auto; }
-.profile-loading { text-align: center; padding: 80px; font-size: 10px; letter-spacing: 0.3em; color: rgba(232,224,208,0.2); font-family: 'Montserrat', sans-serif; }
-
-.profile-header {
-  text-align: center; padding: 0 0 40px;
-  border-bottom: 1px solid rgba(201,169,108,0.08); margin-bottom: 40px;
-}
+.profile-header { text-align: center; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
 .profile-avatar-large {
-  width: 96px; height: 96px; border-radius: 50%;
-  border: 1px solid rgba(201,169,108,0.3);
-  background: rgba(201,169,108,0.06);
+  width: 88px; height: 88px; border-radius: 50%;
+  border: 1px solid var(--gold-border); background: var(--gold-faint);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #C9A96C;
-  margin: 0 auto 20px; overflow: hidden; position: relative;
+  font-family: var(--font-serif); font-size: 32px; color: var(--gold);
+  margin: 0 auto 16px; overflow: hidden; position: relative; cursor: pointer;
 }
-.avatar-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(0,0,0,0.7); text-align: center;
-  font-size: 14px; padding: 5px 0; opacity: 0; transition: opacity 0.2s;
-}
+.avatar-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); text-align: center; font-size: 13px; padding: 5px 0; opacity: 0; transition: opacity 0.2s; }
 .profile-avatar-large:hover .avatar-overlay { opacity: 1; }
 .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-.profile-name { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: #e8e0d0; margin-bottom: 6px; }
-.profile-title { font-size: 13px; font-weight: 300; color: rgba(232,224,208,0.4); margin-bottom: 4px; font-family: 'Montserrat', sans-serif; }
-.profile-company { font-size: 12px; font-weight: 300; color: rgba(232,224,208,0.3); margin-bottom: 14px; font-family: 'Montserrat', sans-serif; }
-.tier-badge { font-size: 9px; letter-spacing: 0.25em; color: #C9A96C; border: 1px solid rgba(201,169,108,0.25); padding: 5px 14px; font-family: 'Montserrat', sans-serif; }
 
-.profile-stats { display: flex; justify-content: center; align-items: center; gap: 40px; padding: 28px 0; border-bottom: 1px solid rgba(201,169,108,0.08); margin-bottom: 40px; }
-.profile-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.stat-val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: #C9A96C; line-height: 1; }
-.stat-lbl { font-size: 9px; letter-spacing: 0.2em; color: rgba(232,224,208,0.25); text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
-.stat-div { width: 1px; height: 36px; background: rgba(201,169,108,0.1); }
+.profile-name { font-family: var(--font-serif); font-size: 42px; font-weight: 300; color: var(--ivory); margin-bottom: 6px; letter-spacing: 0.01em; line-height: 1; }
+.profile-title { font-size: 12px; font-weight: 300; color: var(--ivory-faint); margin-bottom: 3px; font-family: var(--font-sans); letter-spacing: 0.05em; }
+.profile-company { font-size: 12px; font-weight: 300; color: var(--ivory-ghost); margin-bottom: 16px; font-family: var(--font-sans); }
+.profile-tier { margin-top: 4px; }
+.tier-badge { font-size: 9px; letter-spacing: 0.3em; padding: 6px 16px; font-family: var(--font-sans); font-weight: 500; border: 1px solid; display: inline-block; }
+.badge-founder { color: var(--gold); border-color: var(--gold-border-hover); background: var(--gold-faint); }
+.badge-founding { color: var(--ivory-dim); border-color: var(--border); }
+.badge-inner { color: var(--gold); border-color: var(--gold-border); }
+.badge-member { color: var(--ivory-ghost); border-color: rgba(240,236,224,0.08); }
 
-.profile-section { padding: 0 0 36px; border-bottom: 1px solid rgba(201,169,108,0.08); margin-bottom: 36px; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.section-header h3, .profile-section h3 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 9px; font-weight: 500; letter-spacing: 0.3em;
-  text-transform: uppercase; color: rgba(232,224,208,0.3); margin-bottom: 20px;
-}
+.profile-stats { display: flex; justify-content: center; align-items: center; gap: 48px; padding: 24px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+.profile-stat { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.stat-val { font-family: var(--font-serif); font-size: 26px; font-weight: 300; color: var(--gold); line-height: 1; }
+.stat-lbl { font-size: 8px; letter-spacing: 0.25em; color: var(--ivory-ghost); text-transform: uppercase; font-family: var(--font-sans); }
+.stat-div { width: 1px; height: 32px; background: var(--border); }
+
+.profile-section { padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.profile-section:last-child { border-bottom: none; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h3, .profile-section h3 { font-family: var(--font-sans); font-size: 9px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ivory-ghost); margin-bottom: 16px; }
 .section-header h3 { margin-bottom: 0; }
-.edit-btn {
-  background: transparent; border: 1px solid rgba(201,169,108,0.15);
-  color: rgba(232,224,208,0.4); padding: 6px 18px;
-  font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.2em;
-  text-transform: uppercase; cursor: pointer; transition: all 0.2s;
-}
-.edit-btn:hover { border-color: #C9A96C; color: #C9A96C; }
 
-.edit-form { display: flex; flex-direction: column; gap: 20px; }
-.form-group { display: flex; flex-direction: column; gap: 8px; }
-.form-label { font-size: 9px; letter-spacing: 0.3em; color: rgba(232,224,208,0.3); font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
-.input-field {
-  background: rgba(201,169,108,0.02);
-  border: 1px solid rgba(201,169,108,0.1);
-  border-bottom-color: rgba(201,169,108,0.25);
-  color: #e8e0d0; padding: 12px 14px;
-  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300;
-  outline: none; width: 100%; transition: border-color 0.2s;
-}
-.input-field:focus { border-color: rgba(201,169,108,0.35); }
-.input-field option { background: #0a0a0a; }
+.edit-btn { background: transparent; border: 1px solid var(--border); color: var(--ivory-ghost); padding: 6px 16px; font-family: var(--font-sans); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.edit-btn:hover { border-color: var(--gold-border-hover); color: var(--gold); }
 
-.bio-text { font-size: 14px; font-weight: 300; line-height: 1.9; color: rgba(232,224,208,0.5); margin-bottom: 24px; font-family: 'Montserrat', sans-serif; }
-.profile-meta { display: flex; flex-direction: column; gap: 12px; }
-.meta-item { display: flex; align-items: center; gap: 12px; font-size: 12px; color: rgba(232,224,208,0.35); font-family: 'Montserrat', sans-serif; font-weight: 300; }
-.meta-icon { color: rgba(201,169,108,0.4); font-size: 13px; }
+.edit-form { display: flex; flex-direction: column; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-label { font-size: 9px; letter-spacing: 0.3em; color: var(--ivory-ghost); font-family: var(--font-sans); text-transform: uppercase; }
+.input-field { background: rgba(184,151,90,0.02); border: 1px solid var(--border); border-bottom-color: rgba(184,151,90,0.2); color: var(--ivory); padding: 11px 14px; font-family: var(--font-sans); font-size: 13px; font-weight: 300; outline: none; width: 100%; transition: border-color 0.2s; letter-spacing: 0.02em; }
+.input-field:focus { border-color: var(--gold-border-hover); }
+.input-field option { background: var(--surface-2); }
 
-.subscription-badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(201,169,108,0.2); padding: 12px 24px; }
-.sub-icon { color: #C9A96C; }
-.sub-label { font-size: 11px; letter-spacing: 0.3em; color: #C9A96C; font-family: 'Montserrat', sans-serif; font-weight: 500; }
+.bio-text { font-size: 13px; font-weight: 300; line-height: 1.9; color: var(--ivory-dim); margin-bottom: 20px; font-family: var(--font-sans); }
+.profile-meta { display: flex; flex-direction: column; gap: 10px; }
+.meta-item { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--ivory-ghost); font-family: var(--font-sans); font-weight: 300; }
+.meta-icon { color: var(--gold-dim); font-size: 12px; }
 
-.invite-card { background: rgba(201,169,108,0.02); border: 1px solid rgba(201,169,108,0.08); padding: 28px; }
-.invite-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: #e8e0d0; margin-bottom: 8px; }
-.invite-card p { font-size: 12px; font-weight: 300; color: rgba(232,224,208,0.35); line-height: 1.7; font-family: 'Montserrat', sans-serif; }
-.invite-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.subscription-badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--gold-border); padding: 11px 22px; }
+.sub-icon { color: var(--gold); font-size: 12px; }
+.sub-label { font-size: 10px; letter-spacing: 0.3em; color: var(--gold); font-family: var(--font-sans); font-weight: 500; }
+
+.upgrade-card { border: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 12px; background: var(--surface-1); }
+.upgrade-title { font-family: var(--font-serif); font-size: 22px; font-weight: 300; color: var(--ivory); }
+.upgrade-price { font-family: var(--font-serif); font-size: 36px; font-weight: 300; color: var(--gold); line-height: 1; }
+.upgrade-price span { font-size: 14px; color: var(--ivory-ghost); font-family: var(--font-sans); }
+.upgrade-desc { font-size: 12px; font-weight: 300; color: var(--ivory-ghost); line-height: 1.8; font-family: var(--font-sans); }
+
+.invite-card { background: var(--surface-1); border: 1px solid var(--border); padding: 24px; }
+.invite-card h3 { font-family: var(--font-serif); font-size: 22px; font-weight: 300; color: var(--ivory); margin-bottom: 6px; }
+.invite-card p { font-size: 12px; font-weight: 300; color: var(--ivory-ghost); line-height: 1.7; font-family: var(--font-sans); }
+.invite-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
 .founding-spots { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-.spots-num { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: #C9A96C; line-height: 1; }
-.spots-lbl { font-size: 9px; letter-spacing: 0.15em; color: rgba(232,224,208,0.25); text-align: center; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
-.founding-closed { margin-top: 16px; padding: 14px; border: 1px solid rgba(201,169,108,0.08); font-size: 12px; color: rgba(232,224,208,0.3); text-align: center; font-family: 'Montserrat', sans-serif; font-weight: 300; }
+.spots-num { font-family: var(--font-serif); font-size: 36px; font-weight: 300; color: var(--gold); line-height: 1; }
+.spots-lbl { font-size: 8px; letter-spacing: 0.15em; color: var(--ivory-ghost); text-align: center; text-transform: uppercase; font-family: var(--font-sans); }
+.founding-closed { margin-top: 14px; padding: 12px; border: 1px solid var(--border); font-size: 12px; color: var(--ivory-ghost); text-align: center; font-family: var(--font-sans); font-weight: 300; }
 
-.my-codes { margin-top: 24px; }
-.codes-label { font-size: 9px; letter-spacing: 0.3em; color: rgba(232,224,208,0.2); margin-bottom: 12px; font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
-.code-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(201,169,108,0.05); }
+.my-codes { margin-top: 20px; }
+.codes-label { font-size: 9px; letter-spacing: 0.3em; color: var(--ivory-ghost); margin-bottom: 10px; font-family: var(--font-sans); text-transform: uppercase; }
+.code-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(184,151,90,0.06); }
 .code-row.used { opacity: 0.35; }
-.code-text { font-family: 'Montserrat', monospace; font-size: 15px; letter-spacing: 0.2em; color: #C9A96C; flex: 1; }
-.code-status { font-size: 8px; letter-spacing: 0.2em; padding: 3px 10px; border: 1px solid; font-family: 'Montserrat', sans-serif; }
-.code-status.active { color: #C9A96C; border-color: rgba(201,169,108,0.25); }
-.code-status.used { color: rgba(232,224,208,0.2); border-color: rgba(232,224,208,0.08); }
-.copy-code-btn { background: transparent; border: 1px solid rgba(201,169,108,0.15); color: rgba(232,224,208,0.35); padding: 5px 14px; font-size: 9px; letter-spacing: 0.2em; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
-.copy-code-btn:hover { border-color: #C9A96C; color: #C9A96C; }
+.code-text { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0.2em; color: var(--gold); flex: 1; font-weight: 400; }
+.code-status { font-size: 8px; letter-spacing: 0.2em; padding: 3px 10px; border: 1px solid; font-family: var(--font-sans); }
+.code-status.active { color: var(--gold); border-color: var(--gold-border); }
+.code-status.used { color: var(--ivory-ghost); border-color: var(--border); }
+.copy-code-btn { background: transparent; border: 1px solid var(--border); color: var(--ivory-ghost); padding: 5px 12px; font-size: 9px; letter-spacing: 0.2em; cursor: pointer; transition: all 0.2s; font-family: var(--font-sans); }
+.copy-code-btn:hover { border-color: var(--gold-border-hover); color: var(--gold); }
 
-.btn-primary { padding: 12px 32px; background: #C9A96C; color: #000; border: none; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.25em; cursor: pointer; transition: all 0.2s; }
-.btn-primary:hover { background: #d4b87a; }
+.btn-primary { padding: 12px 32px; background: var(--gold); color: var(--black); border: none; font-family: var(--font-sans); font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+.btn-primary:hover { background: var(--gold-light); }
 .btn-primary:disabled { opacity: 0.35; cursor: default; }
-.btn-secondary { padding: 12px 32px; background: transparent; border: 1px solid rgba(201,169,108,0.25); color: #C9A96C; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.25em; cursor: pointer; transition: all 0.2s; }
-.btn-secondary:hover { background: rgba(201,169,108,0.06); border-color: #C9A96C; }
+.btn-secondary { padding: 11px 28px; background: transparent; border: 1px solid var(--gold-border); color: var(--gold); font-family: var(--font-sans); font-size: 9px; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: var(--gold-faint); border-color: var(--gold); }
 .btn-secondary:disabled { opacity: 0.35; cursor: default; }
-
-/* BADGES */
-.badge-founder { color: #C9A96C; border-color: rgba(201,169,108,0.4); background: rgba(201,169,108,0.08); }
-.badge-founding { color: #e8e0d0; border-color: rgba(232,224,208,0.2); }
-.badge-inner { color: #C9A96C; border-color: rgba(201,169,108,0.3); }
-.badge-member { color: rgba(232,224,208,0.3); border-color: rgba(232,224,208,0.1); }
-
-/* UPGRADE CARD */
-.upgrade-card { border: 1px solid rgba(201,169,108,0.15); padding: 28px; display: flex; flex-direction: column; gap: 16px; }
-.upgrade-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: #e8e0d0; }
-.upgrade-price { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: #C9A96C; line-height: 1; }
-.upgrade-price span { font-size: 16px; color: rgba(232,224,208,0.3); font-family: 'Montserrat', sans-serif; }
-.upgrade-desc { font-size: 12px; font-weight: 300; color: rgba(232,224,208,0.4); line-height: 1.8; font-family: 'Montserrat', sans-serif; }
 
 
 
