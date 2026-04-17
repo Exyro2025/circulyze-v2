@@ -11,11 +11,11 @@ const NAV = [
 ];
 
 export default function AppLayout({ children }) {
-  const { user, profile, signOut } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
 
   const initials = () => {
-    const name = profile?.displayName || user?.displayName || user?.email || 'U';
+    const name = userProfile?.full_name || user?.displayName || user?.email || 'U';
     return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   };
 
@@ -29,11 +29,15 @@ export default function AppLayout({ children }) {
       <header className="app-header">
         <NavLink to="/feed" className="app-logo">Circulyze</NavLink>
         <div className="app-header-right">
-          {(profile?.role === 'admin') && (
+          {userProfile?.role === 'admin' && (
             <NavLink to="/admin" className="admin-link">Admin</NavLink>
           )}
           <button className="avatar-btn" onClick={() => navigate('/profile')}>
-            {initials()}
+            {userProfile?.profile_image ? (
+              <img src={userProfile.profile_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              initials()
+            )}
           </button>
         </div>
       </header>
@@ -57,3 +61,4 @@ export default function AppLayout({ children }) {
     </div>
   );
 }
+
