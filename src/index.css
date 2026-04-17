@@ -1,34 +1,204 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Montserrat:wght@200;300;400;500;600&family=Cormorant:ital,wght@1,300;1,400&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
-  --gold: #C9A96C;
-  --gold-dim: rgba(201,169,108,0.5);
-  --gold-faint: rgba(201,169,108,0.1);
-  --black: #000000;
-  --bg: #080808;
-  --surface: rgba(255,255,255,0.02);
-  --border: rgba(201,169,108,0.12);
-  --text: #e8e0d0;
-  --text-dim: rgba(232,224,208,0.5);
-  --text-faint: rgba(232,224,208,0.25);
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Montserrat', sans-serif;
+  /* Core palette — drawn from Morvanti/Époque DNA */
+  --black:        #0a0a08;
+  --black-deep:   #060605;
+  --surface-1:    #0f0f0d;
+  --surface-2:    #141412;
+  --surface-3:    #1a1a17;
+
+  /* Gold — warm, not bright */
+  --gold:         #b8975a;
+  --gold-light:   #d4b07a;
+  --gold-dim:     rgba(184,151,90,0.5);
+  --gold-faint:   rgba(184,151,90,0.08);
+  --gold-border:  rgba(184,151,90,0.15);
+  --gold-border-hover: rgba(184,151,90,0.3);
+
+  /* Text */
+  --ivory:        #f0ece0;
+  --ivory-dim:    rgba(240,236,224,0.6);
+  --ivory-faint:  rgba(240,236,224,0.25);
+  --ivory-ghost:  rgba(240,236,224,0.12);
+
+  /* Borders */
+  --border:       rgba(184,151,90,0.12);
+  --border-light: rgba(240,236,224,0.06);
+
+  /* Typography */
+  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --font-sans:    'Montserrat', sans-serif;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
 }
 
 html, body {
   height: 100%;
   background: var(--black);
-  color: var(--text);
+  color: var(--ivory);
   font-family: var(--font-sans);
+  font-weight: 300;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.01em;
 }
 
 #root { height: 100%; }
 
 a { color: inherit; text-decoration: none; }
-button { font-family: var(--font-sans); }
-input, textarea { font-family: var(--font-sans); }
+button { font-family: var(--font-sans); cursor: pointer; }
+input, textarea, select { font-family: var(--font-sans); }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
+/* Global scrollbar */
+::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(201,169,108,0.15); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(184,151,90,0.2); border-radius: 2px; }
+
+/* Global button resets */
+button { border: none; background: none; }
+
+/* Global input styles */
+input, textarea, select {
+  background: rgba(184,151,90,0.03);
+  border: none;
+  border-bottom: 1px solid var(--gold-border);
+  color: var(--ivory);
+  padding: 12px 0;
+  font-size: 13px;
+  font-weight: 300;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+  letter-spacing: 0.03em;
+}
+input:focus, textarea:focus, select:focus {
+  border-bottom-color: var(--gold-dim);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--ivory-ghost);
+  font-weight: 300;
+}
+
+/* Global form label */
+.label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Global buttons */
+.btn-gold {
+  padding: 13px 36px;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-block;
+}
+.btn-gold:hover { background: var(--gold-light); }
+.btn-gold:disabled { opacity: 0.35; cursor: default; }
+
+.btn-outline {
+  padding: 12px 32px;
+  background: transparent;
+  border: 1px solid var(--gold-border);
+  color: var(--gold);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+}
+.btn-outline:hover { border-color: var(--gold); background: var(--gold-faint); }
+.btn-outline:disabled { opacity: 0.35; cursor: default; }
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--ivory-faint);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-ghost:hover { color: var(--ivory); }
+
+/* Eyebrow text */
+.eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: block;
+}
+
+/* Section titles */
+.display-title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  color: var(--ivory);
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+}
+
+/* Dividers */
+.gold-rule {
+  height: 1px;
+  background: var(--border);
+  border: none;
+  margin: 0;
+}
+
+/* Input field wrapper */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.field input,
+.field textarea,
+.field select {
+  padding: 12px 14px;
+  background: rgba(184,151,90,0.03);
+  border: 1px solid var(--border);
+  border-bottom-color: rgba(184,151,90,0.25);
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--gold-border-hover);
+}
+.field select option { background: var(--surface-2); }
